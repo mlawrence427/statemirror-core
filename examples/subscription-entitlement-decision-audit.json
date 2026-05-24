@@ -1,0 +1,54 @@
+{
+  "evidence_ref": "premium-api:user_123:req_2025_12_01_184422",
+  "evidence_type": "subscription_entitlement_decision",
+  "captured_at": "2025-12-01T18:44:22.000Z",
+  "source_system": "premium-api-gateway",
+  "source_version": "1.0.0",
+  "correlation_id": "req_2025_12_01_184422",
+  "state_payload": {
+    "subject": "user_123",
+    "requested_resource": "premium_api",
+    "request_context": {
+      "route": "/v1/premium/report",
+      "method": "GET",
+      "environment": "production"
+    },
+    "inputs": {
+      "plan": {
+        "component": "PlanSignal",
+        "status": "active",
+        "plan": "commercial",
+        "entitlements": [
+          "premium_api",
+          "priority_exports"
+        ],
+        "read_at": "2025-12-01T18:44:21.810Z"
+      },
+      "deny": {
+        "component": "DenySignal",
+        "signal": "denial_absent",
+        "scope": "premium_api",
+        "read_at": "2025-12-01T18:44:21.842Z"
+      },
+      "expiry": {
+        "component": "ExpirySignal",
+        "signal": "not_expired",
+        "expires_at": "2026-01-01T00:00:00.000Z",
+        "cause_code": "subscription_period_end",
+        "renewable": true,
+        "read_at": "2025-12-01T18:44:21.879Z"
+      }
+    },
+    "computed": {
+      "eligible": true,
+      "decision": "granted",
+      "policy_version": "premium-api-access-2025-12-REV-A",
+      "reason": "active_commercial_plan_no_denial_not_expired"
+    },
+    "outcome": {
+      "owned_by": "application",
+      "action": "grant_premium_api_access",
+      "executed_outside_statemirror": true
+    }
+  }
+}

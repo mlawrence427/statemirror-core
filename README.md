@@ -1,278 +1,323 @@
-# StateMirror
+# StateMirror Core
 
-A self-hosted, write-once ledger for state evidence snapshots.
+Immutable evidence snapshots for application decision systems.
 
-StateMirror captures and preserves immutable JSON snapshots of computed state ("evidence") at a point in time, and provides integrity verification via cryptographic hash chaining.
+StateMirror Core is a self-hosted runtime for capturing the exact JSON evidence your application computed at a decision moment. It stores that evidence immutably, assigns it a reference, and provides hash-chain verification for later review.
 
-## What StateMirror Is NOT
+StateMirror does not decide outcomes. It preserves what your system submitted.
 
-- **Not observability**: No dashboards, metrics, or alerting
-- **Not logging**: Captures computed state, not event streams
-- **Not analytics**: No aggregation, trending, or reporting
-- **Not event sourcing**: Stores computed state, not domain events
-- **Not a policy engine**: Does not make or enforce decisions
+---
 
-## Quick Start
+## Boundary
 
-### Using Docker Compose
+StateMirror Core does not:
 
-```bash
-# Start PostgreSQL and StateMirror
-docker-compose up -d
+- authorize users
+- enforce policy
+- grant access
+- revoke access
+- execute workflows
+- send webhooks
+- operate a hosted control plane
+- provide dashboards or analytics
 
-# Wait for services to be ready
-sleep 10
+Applications compute facts. Applications decide. Applications execute outcomes.
 
-# Run migrations (inside container)
-docker-compose exec statemirror node dist/db/migrate.js
+StateMirror preserves submitted evidence.
 
-# Test health endpoint
-curl http://localhost:8080/v1/health
+---
+
+## Why this exists
+
+Production systems often need to answer a hard question later:
+
+> What did the application believe was true when it made this decision?
+
+Logs are noisy.
+Events are fragmented.
+Current database state has already changed.
+
+StateMirror captures a decision-time evidence snapshot so support, operations, compliance, or dispute workflows can retrieve the exact payload later.
+
+---
+
+## Repository contents
+
+```txt
+migrations/       PostgreSQL schema and indexes
+src/              StateMirror Core runtime
+tests/            Smoke tests
+scripts/          Local smoke-test script
+docs/             Architecture and quickstart notes
+examples/         Canonical example payloads
+
+docker-compose.yml
+Dockerfile
+Makefile
 ```
 
-### Local Development
+---
+
+## Architecture
+
+See:
+
+```txt
+docs/architecture.md
+```
+
+Core boundary:
+
+```txt
+Application computes facts
+↓
+Application submits evidence payload
+↓
+StateMirror preserves immutable snapshot
+↓
+Application executes outcome
+↓
+Support later retrieves exact evidence
+```
+
+StateMirror is an evidence plane, not an enforcement plane.
+
+---
+
+## Quick start
+
+See:
+
+```txt
+docs/quickstart.md
+```
+
+Short path:
 
 ```bash
-# Install dependencies
-npm install
-
-# Set up environment
 cp .env.example .env
-# Edit .env with your PostgreSQL connection
-
-# Run migrations
+docker-compose up -d
+npm install
 npm run migrate
-
-# Start development server
-npm run dev
+npm run build
+npm run start
+npm run smoke
 ```
 
-## API Reference
+Expected local server:
 
-### Authentication
-
-All endpoints except `/v1/health` require Bearer token authentication:
-
-```
-Authorization: Bearer <api_key>
+```txt
+http://localhost:8080
 ```
 
-Configure keys via environment variables:
-- `READ_API_KEYS`: Comma-separated keys for read operations
-- `WRITE_API_KEYS`: Comma-separated keys for write operations
+---
 
-### Endpoints
+## Canonical example
 
-#### Health Check
+See:
+
+```txt
+examples/subscription-entitlement-decision-audit.json
+```
+
+This example models a subscription entitlement decision workflow:
+
+```txt
+User attempts premium API access
+↓
+Application queries entitlement, denial, and expiry facts
+↓
+Application computes eligibility
+↓
+Application snapshots evidence in StateMirror
+↓
+Application executes outcome
+↓
+Support later retrieves exact decision snapshot
+```
+
+---
+
+## API overview
+
+### Health
 
 ```bash
 GET /v1/health
-# No authentication required
-
-# Response:
-{
-  "status": "healthy",
-  "database": "connected",
-  "latest_sequence": 42,
-  "latest_received_at": "2024-01-15T10:30:00.000Z"
-}
 ```
 
+No authentication required.
 
-> Backwards compatibility: `decision_ref` / `decision_type` are accepted on write and query as deprecated aliases for `evidence_ref` / `evidence_type`.
-#### Create Snapshot
+---
+
+### Create snapshot
 
 ```bash
 POST /v1/snapshots
 Authorization: Bearer <write_key>
 Idempotency-Key: <unique-key>
 Content-Type: application/json
-
-{
-  "evidence_ref": "ban_appeal:user:12345:2024-01-15",
-  "evidence_type": "ban_appeal_review",
-  "captured_at": "2024-01-15T10:30:00.000Z",
-  "state_payload": {
-    "user_id": "12345",
-    "account_status": "suspended",
-    "computed_risk_score": 0.73
-  },
-  "source_system": "trust-safety-api",
-  "source_version": "2.14.0",
-  "correlation_id": "trace-abc-123"
-}
-
-# Response (201 Created):
-{
-  "snapshot_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  "sequence_num": 42,
-  "received_at": "2024-01-15T10:30:00.142Z",
-  "payload_hash": "base64...",
-  "chain_hash": "base64..."
-}
 ```
 
-**Idempotency**:
-- Same key + same payload → 200 with original response
-- Same key + different payload → 409 Conflict
+Example payload:
 
-#### Get Snapshot by ID
-
-```bash
-GET /v1/snapshots/:snapshot_id
-Authorization: Bearer <read_key>
-
-# Response:
+```json
 {
-  "snapshot_id": "...",
-  "sequence_num": 42,
-  "evidence_ref": "...",
-  "evidence_type": "...",
-  "captured_at": "...",
-  "received_at": "...",
-  "state_payload": { ... },
-  "payload_hash": "...",
-  "chain_hash": "...",
-  "integrity": {
-    "payload_valid": true,
-    "chain_valid": true
+  "evidence_ref": "premium-api:user_123:req_abc",
+  "evidence_type": "subscription_entitlement_decision",
+  "captured_at": "2025-12-01T18:44:22.000Z",
+  "state_payload": {
+    "subject": "user_123",
+    "requested_resource": "premium_api",
+    "computed": {
+      "eligible": true,
+      "decision": "granted"
+    }
   }
 }
 ```
 
-#### Query by Decision Reference
+Idempotency behavior:
 
-```bash
-GET /v1/snapshots?evidence_ref=ban_appeal:user:12345
-Authorization: Bearer <read_key>
-
-# Response:
-{
-  "snapshots": [ ... ],
-  "count": 1
-}
+```txt
+same key + same payload      → original snapshot response
+same key + different payload → conflict
 ```
 
-#### Query by Type and Time Window
+---
+
+### Retrieve snapshot
 
 ```bash
-GET /v1/snapshots?evidence_type=ban_appeal_review&captured_after=2024-01-15T00:00:00Z&captured_before=2024-01-16T00:00:00Z&limit=50
+GET /v1/snapshots/{snapshot_id}
 Authorization: Bearer <read_key>
-
-# Note: Time window cannot exceed 24 hours, limit max 100
 ```
 
-#### Verify Chain Integrity
+---
+
+### Query by evidence reference
+
+```bash
+GET /v1/snapshots?evidence_ref=<evidence_ref>
+Authorization: Bearer <read_key>
+```
+
+---
+
+### Verify integrity
 
 ```bash
 POST /v1/integrity/verify
 Authorization: Bearer <read_key>
 Content-Type: application/json
+```
 
+Example body:
+
+```json
 {
   "from_sequence": 1,
   "to_sequence": 100
 }
-
-# Response (valid):
-{
-  "valid": true,
-  "checked_count": 100,
-  "first_sequence": 1,
-  "last_sequence": 100,
-  "elapsed_ms": 142
-}
-
-# Response (invalid):
-{
-  "valid": false,
-  "break_at_sequence": 47,
-  "expected_prev_hash": "...",
-  "actual_prev_hash": "...",
-  "checked_count": 47,
-  ...
-}
 ```
 
-## Integrity Model
+---
 
-### Hash Chain
+## Integrity model
 
 Each snapshot contains:
-- `payload_hash`: SHA-256 of canonicalized `state_payload`
-- `prev_chain_hash`: `chain_hash` of the previous snapshot
-- `chain_hash`: SHA-256(sequence_num || payload_hash || prev_chain_hash)
 
-This creates a sequential dependency where modifying any snapshot invalidates all subsequent chain hashes.
+```txt
+payload_hash
+prev_chain_hash
+chain_hash
+sequence_num
+```
 
-### Canonicalization
+Conceptually:
 
-State payloads are canonicalized before hashing using RFC 8785 principles:
-- Object keys sorted lexicographically
-- No whitespace
-- UTF-8 encoding
-- Stable number serialization
+```txt
+payload_hash = hash(canonical_json(state_payload))
 
-This ensures the same logical payload always produces the same hash.
+chain_hash = hash(
+  sequence_num,
+  payload_hash,
+  prev_chain_hash
+)
+```
 
-### What This Provides
+This creates tamper-evident ordering.
 
-- **Tamper evidence**: Any modification is detectable
-- **Ordering proof**: Sequence is cryptographically enforced
-- **Completeness check**: Gaps in sequence are detectable
+If a historical payload changes, verification fails.
 
-### What This Does NOT Provide
+StateMirror provides tamper evidence.
+It does not provide legal non-repudiation, Byzantine fault tolerance, or compliance guarantees by itself.
 
-- Non-repudiation (no signatures)
-- Byzantine fault tolerance
-- Legal-grade audit compliance
+---
 
 ## Configuration
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `DATABASE_URL` | (required) | PostgreSQL connection string |
-| `PORT` | 8080 | Server port |
-| `MAX_PAYLOAD_BYTES` | 1048576 | Max state_payload size (1MB) |
-| `READ_API_KEYS` | (required) | Comma-separated read keys |
-| `WRITE_API_KEYS` | (required) | Comma-separated write keys |
-| `LOG_LEVEL` | info | Logging level |
-| `CLEANUP_ON_STARTUP` | true | Delete expired idempotency keys on start |
+| Variable | Description |
+|---|---|
+| DATABASE_URL | PostgreSQL connection string |
+| PORT | Server port |
+| MAX_PAYLOAD_BYTES | Maximum accepted payload size |
+| READ_API_KEYS | Comma-separated read keys |
+| WRITE_API_KEYS | Comma-separated write keys |
+| LOG_LEVEL | Runtime log level |
+| CLEANUP_ON_STARTUP | Cleanup expired idempotency records |
 
-## Limits & Failure Modes
-
-### Limits
-
-- Maximum payload size: 1MB (configurable)
-- Query results capped at 100 snapshots
-- Time window queries limited to 24 hours
-- Idempotency keys expire after 24 hours
-
-### Failure Modes
-
-| Failure | Detection | Mitigation |
-|---------|-----------|------------|
-| Network failure during write | Client timeout | Retry with same idempotency key |
-| Database unavailable | 503 response | Retry with backoff |
-| Payload hash mismatch on read | `integrity.payload_valid: false` | Data corruption; restore from backup |
-| Chain hash mismatch | `integrity.chain_valid: false` | Tampering or corruption; investigate |
+---
 
 ## Development
 
 ```bash
-# Run tests
-npm run test
-
-# Run smoke tests (requires running server)
-npm run smoke
-
-# Build for production
+npm install
+npm run migrate
 npm run build
-
-# Run production build
 npm run start
+npm run test
+npm run smoke
 ```
+
+---
+
+## Design posture
+
+StateMirror Core is intentionally:
+
+- self-hosted
+- deterministic
+- explicit
+- operationally boring
+- inspectable
+- reference-driven
+- separate from enforcement
+
+The application decides.
+
+StateMirror preserves evidence.
+
+---
+
+## Related project
+
+SimpleStates products are built on top of StateMirror Core.
+
+SimpleStates extends the evidence model into additional state primitives such as:
+
+- PlanSignal
+- DenySignal
+- ExpirySignal
+
+Website:
+
+```txt
+https://www.simple-states.com
+```
+
+---
 
 ## License
 
-MIT
+Apache-2.0
