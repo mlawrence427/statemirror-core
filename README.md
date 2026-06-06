@@ -12,18 +12,36 @@ StateMirror does not decide outcomes. It preserves what your system submitted.
 
 StateMirror Core does not:
 
-- authorize users
-- enforce policy
-- grant access
-- revoke access
-- execute workflows
-- send webhooks
-- operate a hosted control plane
-- provide dashboards or analytics
+* authorize users
+* enforce policy
+* grant access
+* revoke access
+* expire accounts
+* execute workflows
+* trigger webhooks
+* send notifications
+* operate a hosted control plane
+* provide dashboards or analytics
+* evaluate business rules
+* replace your application logic
 
 Applications compute facts. Applications decide. Applications execute outcomes.
 
 StateMirror preserves submitted evidence.
+
+---
+
+## Core model
+
+StateMirror is schema-agnostic at the core.
+
+Your application submits evidence-shaped JSON. StateMirror preserves it immutably and makes it retrievable by reference.
+
+StateMirror can support optional canonical evidence shapes for common patterns, but those shapes are not required formats. Custom evidence schemas remain first-class.
+
+Plan Evidence, Denial Evidence, and Expiry Evidence are examples of optional canonical evidence shapes. They are passive evidence types only.
+
+They do not grant access, deny access, expire accounts, evaluate policy, run workflows, or enforce outcomes.
 
 ---
 
@@ -39,6 +57,8 @@ Current database state has already changed.
 
 StateMirror captures a decision-time evidence snapshot so support, operations, compliance, or dispute workflows can retrieve the exact payload later.
 
+StateMirror is for preserving the evidence behind a decision, not for making the decision.
+
 ---
 
 ## Repository contents
@@ -48,7 +68,7 @@ migrations/       PostgreSQL schema and indexes
 src/              StateMirror Core runtime
 tests/            Smoke tests
 scripts/          Local smoke-test script
-docs/             Architecture and quickstart notes
+docs/             Architecture, quickstart, boundary, and DX notes
 examples/         Canonical example payloads
 
 docker-compose.yml
@@ -112,7 +132,7 @@ http://localhost:8080
 
 ---
 
-## Canonical example
+## Canonical examples
 
 See:
 
@@ -135,6 +155,15 @@ Application executes outcome
 ↓
 Support later retrieves exact decision snapshot
 ```
+
+Additional examples may model other decision-evidence patterns, such as:
+
+* subscription downgrade
+* entitlement denial
+* expiry state
+* workflow approval
+
+These examples are not required schemas. They are reference patterns for evidence discipline.
 
 ---
 
@@ -251,20 +280,33 @@ This creates tamper-evident ordering.
 If a historical payload changes, verification fails.
 
 StateMirror provides tamper evidence.
+
 It does not provide legal non-repudiation, Byzantine fault tolerance, or compliance guarantees by itself.
+
+---
+
+## Why not just logs, JSONB, or OPA?
+
+StateMirror does not replace logs. Logs are useful for operational debugging, but they are often noisy, fragmented, and difficult to treat as a stable decision record.
+
+StateMirror does not replace JSONB. It formalizes the evidence pattern teams often try to build with JSONB.
+
+StateMirror is not valuable because it uses JSON. It is valuable because it turns decision evidence into a disciplined, verifiable, append-only record.
+
+StateMirror does not replace OPA or policy engines. Policy engines can help applications evaluate rules. StateMirror preserves the evidence the application submitted before or around the moment it acted.
 
 ---
 
 ## Configuration
 
-| Variable | Description |
-|---|---|
-| DATABASE_URL | PostgreSQL connection string |
-| PORT | Server port |
-| MAX_PAYLOAD_BYTES | Maximum accepted payload size |
-| READ_API_KEYS | Comma-separated read keys |
-| WRITE_API_KEYS | Comma-separated write keys |
-| LOG_LEVEL | Runtime log level |
+| Variable           | Description                         |
+| ------------------ | ----------------------------------- |
+| DATABASE_URL       | PostgreSQL connection string        |
+| PORT               | Server port                         |
+| MAX_PAYLOAD_BYTES  | Maximum accepted payload size       |
+| READ_API_KEYS      | Comma-separated read keys           |
+| WRITE_API_KEYS     | Comma-separated write keys          |
+| LOG_LEVEL          | Runtime log level                   |
 | CLEANUP_ON_STARTUP | Cleanup expired idempotency records |
 
 ---
@@ -286,13 +328,14 @@ npm run smoke
 
 StateMirror Core is intentionally:
 
-- self-hosted
-- deterministic
-- explicit
-- operationally boring
-- inspectable
-- reference-driven
-- separate from enforcement
+* self-hosted
+* deterministic
+* explicit
+* operationally boring
+* inspectable
+* reference-driven
+* schema-agnostic at the core
+* separate from enforcement
 
 The application decides.
 
@@ -300,15 +343,19 @@ StateMirror preserves evidence.
 
 ---
 
-## Related project
+## Related SimpleStates evidence shapes
 
-SimpleStates products are built on top of StateMirror Core.
+StateMirror Core stays schema-agnostic.
 
-SimpleStates extends the evidence model into additional state primitives such as:
+SimpleStates may provide optional canonical evidence shapes for common decision evidence patterns, including:
 
-- PlanSignal
-- DenySignal
-- ExpirySignal
+* Plan Evidence
+* Denial Evidence
+* Expiry Evidence
+
+These are optional schemas only. Custom evidence schemas remain first-class.
+
+They do not change the StateMirror boundary: the application owns the decision, and StateMirror preserves the evidence.
 
 Website:
 

@@ -1,0 +1,49 @@
+{
+"evidence_ref": "expense-approval:request_456:review_2025_12_01",
+"evidence_type": "workflow_approval_decision",
+"captured_at": "2025-12-01T14:22:18.000Z",
+"source_system": "expense-approval-service",
+"source_version": "1.0.0",
+"correlation_id": "approval_req_456",
+"state_payload": {
+"subject": "expense_request_456",
+"requested_action": "approve_expense_reimbursement",
+"request_context": {
+"department": "engineering",
+"environment": "production",
+"workflow": "expense_approval"
+},
+"inputs": {
+"request": {
+"amount_usd": 4200,
+"currency": "USD",
+"submitted_by": "employee_123",
+"submitted_at": "2025-12-01T13:55:02.000Z",
+"read_at": "2025-12-01T14:22:15.000Z"
+},
+"policy": {
+"policy_id": "expense-policy-2025",
+"max_manager_approval_limit": 5000,
+"requires_finance_review": false,
+"read_at": "2025-12-01T14:22:15.200Z"
+},
+"reviewer": {
+"reviewer_id": "manager_789",
+"role": "engineering_manager",
+"approval_authority_limit": 5000,
+"read_at": "2025-12-01T14:22:15.400Z"
+}
+},
+"computed": {
+"eligible_for_approval": true,
+"decision": "approved",
+"policy_version": "expense-policy-2025-rev-a",
+"reason": "amount_within_manager_authority_limit"
+},
+"outcome": {
+"owned_by": "application",
+"action": "approve_expense_request",
+"executed_outside_statemirror": true
+}
+}
+}

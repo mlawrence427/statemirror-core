@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.1.1
+
+Documentation and DX release.
+
+Highlights:
+
+- Expanded README positioning and boundary language
+- Clarified that StateMirror Core is schema-agnostic
+- Clarified that Plan Evidence, Denial Evidence, and Expiry Evidence are optional canonical evidence shapes
+- Added stronger FAQ answers for logs, observability, JSONB, OPA, schema validation, stale reads, corrections, and hash-chain verification
+- Added clearer framing for custom evidence schemas
+- Improved quickstart and sample snapshot guidance
+- Reinforced that StateMirror preserves evidence only and does not decide, enforce, trigger, or execute outcomes
+
 ## v0.1.0
 
 Initial public release.
