@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.2.0
+
+Native Evidence Lanes release.
+
+Highlights:
+
+- Added native TypeScript reference shapes for PlanEvidence, DenialEvidence, and ExpiryEvidence
+- Added a dedicated Evidence Lanes example snapshot
+- Documented Evidence Lanes as optional canonical shapes for use inside `state_payload.inputs`
+- Reaffirmed that Evidence Lanes are not required formats and do not change snapshot-layer schema agnosticism
+- Reaffirmed that StateMirror preserves submitted evidence and does not decide, enforce, evaluate policy, execute workflows, or own application actions
+- Fixed existing TypeScript build errors as maintenance cleanup
+
 ## v0.1.1
 
 Documentation and DX release.
