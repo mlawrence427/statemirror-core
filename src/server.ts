@@ -23,9 +23,15 @@ export async function buildServer(config: Config) {
   });
 
   // Register routes
-  await fastify.register(healthRoutes, config);
-  await fastify.register(snapshotRoutes, config);
-  await fastify.register(integrityRoutes, config);
+  await fastify.register(async (instance) => {
+    await healthRoutes(instance, config);
+  });
+  await fastify.register(async (instance) => {
+    await snapshotRoutes(instance, config);
+  });
+  await fastify.register(async (instance) => {
+    await integrityRoutes(instance, config);
+  });
 
   // Global error handler
   fastify.setErrorHandler((error, request, reply) => {

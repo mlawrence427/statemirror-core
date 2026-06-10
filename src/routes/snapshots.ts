@@ -206,6 +206,9 @@ export async function snapshotRoutes(fastify: FastifyInstance, config: Config) {
           );
 
           return {
+            component: config.component,
+            version: config.version,
+            warnings: [],
             snapshot_id: snapshotId,
             sequence_num: Number(sequenceNum),
             received_at: receivedAt.toISOString(),
@@ -393,7 +396,7 @@ export async function snapshotRoutes(fastify: FastifyInstance, config: Config) {
         }
 
         const snapshots = await Promise.all(
-          result.rows.map((row) => formatSnapshotWithIntegrity(row, pool))
+          result.rows.map((row) => formatSnapshotWithIntegrity(row, pool, config))
         );
 
         return reply.send({
@@ -459,7 +462,7 @@ export async function snapshotRoutes(fastify: FastifyInstance, config: Config) {
         );
 
         const snapshots = await Promise.all(
-          result.rows.map((row) => formatSnapshotWithIntegrity(row, pool))
+          result.rows.map((row) => formatSnapshotWithIntegrity(row, pool, config))
         );
 
         return reply.send({
@@ -480,7 +483,8 @@ export async function snapshotRoutes(fastify: FastifyInstance, config: Config) {
 
 async function formatSnapshotWithIntegrity(
   row: SnapshotRecord,
-  pool: ReturnType<typeof getPool>
+  pool: ReturnType<typeof getPool>,
+  config: Config
 ): Promise<SnapshotFullResponse> {
   // Verify payload integrity
   const recomputedPayloadHash = hashPayload(row.state_payload);
@@ -517,6 +521,9 @@ async function formatSnapshotWithIntegrity(
   }
 
   return {
+    component: config.component,
+    version: config.version,
+    warnings: [],
     snapshot_id: row.snapshot_id,
     sequence_num: parseInt(row.sequence_num, 10),
     evidence_ref: row.evidence_ref,
