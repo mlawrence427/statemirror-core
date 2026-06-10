@@ -208,27 +208,27 @@ No specific evidence schema is required.
 
 ---
 
-# Canonical evidence shapes
+# Native Evidence Lanes
 
-StateMirror may provide optional canonical evidence shapes for common patterns.
+StateMirror provides native optional canonical Evidence Lane shapes for common patterns.
 
-Examples include:
+The current lane types are:
 
-* Plan Evidence
-* Denial Evidence
-* Expiry Evidence
+* PlanEvidence
+* DenialEvidence
+* ExpiryEvidence
 
-These are reference schemas only.
+These shapes are useful inside `state_payload.inputs`.
 
-They are not required formats.
+They are reference schemas only. They are not required formats.
 
 Applications remain free to use custom evidence schemas.
 
 ---
 
-# Plan Evidence boundary
+# PlanEvidence boundary
 
-Plan Evidence may describe facts such as:
+PlanEvidence may describe facts such as:
 
 ```txt
 plan = commercial
@@ -236,7 +236,7 @@ status = active
 entitlements = [...]
 ```
 
-Plan Evidence does not:
+PlanEvidence does not:
 
 ```txt
 grant access
@@ -249,9 +249,9 @@ It only preserves evidence.
 
 ---
 
-# Denial Evidence boundary
+# DenialEvidence boundary
 
-Denial Evidence may describe facts such as:
+DenialEvidence may describe facts such as:
 
 ```txt
 denial present
@@ -260,7 +260,7 @@ reason code
 scope
 ```
 
-Denial Evidence does not:
+DenialEvidence does not:
 
 ```txt
 block requests
@@ -272,9 +272,9 @@ It only preserves evidence.
 
 ---
 
-# Expiry Evidence boundary
+# ExpiryEvidence boundary
 
-Expiry Evidence may describe facts such as:
+ExpiryEvidence may describe facts such as:
 
 ```txt
 expires_at
@@ -283,7 +283,7 @@ not_expired
 renewable
 ```
 
-Expiry Evidence does not:
+ExpiryEvidence does not:
 
 ```txt
 expire accounts

@@ -28,7 +28,7 @@ StateMirror Core is schema-agnostic at the core.
 
 Your application can submit custom evidence schemas.
 
-Optional canonical evidence shapes, such as Plan Evidence, Denial Evidence, and Expiry Evidence, may be provided as reference patterns. They are not required formats.
+Native optional canonical Evidence Lane shapes, such as PlanEvidence, DenialEvidence, and ExpiryEvidence, are provided as reference patterns. They are not required formats.
 
 ---
 
@@ -182,17 +182,27 @@ Canonical examples are optional reference patterns, not required formats.
 
 ---
 
-## Are Plan Evidence, Denial Evidence, and Expiry Evidence required?
+## Are PlanEvidence, DenialEvidence, and ExpiryEvidence required?
 
 No.
 
-They are optional canonical evidence shapes.
+They are optional canonical Evidence Lane shapes.
 
-They may be useful for common application decision patterns, but they are not required by StateMirror Core.
+They may be useful inside `state_payload.inputs` for common application decision patterns, but they are not required by StateMirror Core.
 
 StateMirror should not become limited to SaaS entitlements.
 
 Custom evidence schemas remain allowed.
+
+---
+
+## Does StateMirror validate or enforce Evidence Lanes?
+
+No.
+
+PlanEvidence, DenialEvidence, and ExpiryEvidence are native TypeScript reference shapes only.
+
+StateMirror stores them as ordinary snapshot payload JSON. It does not require them, validate policy with them, decide outcomes, enforce outcomes, execute workflows, or own application actions.
 
 ---
 

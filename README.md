@@ -37,11 +37,11 @@ StateMirror is schema-agnostic at the core.
 
 Your application submits evidence-shaped JSON. StateMirror preserves it immutably and makes it retrievable by reference.
 
-StateMirror can support optional canonical evidence shapes for common patterns, but those shapes are not required formats. Custom evidence schemas remain first-class.
+StateMirror includes native optional canonical evidence shapes for common patterns, but those shapes are not required formats. Custom evidence schemas remain first-class.
 
-Plan Evidence, Denial Evidence, and Expiry Evidence are examples of optional canonical evidence shapes. They are passive evidence types only.
+PlanEvidence, DenialEvidence, and ExpiryEvidence are optional canonical Evidence Lanes. They are useful inside `state_payload.inputs` when an application wants to preserve plan, denial, or expiry facts in a consistent shape.
 
-They do not grant access, deny access, expire accounts, evaluate policy, run workflows, or enforce outcomes.
+Evidence Lanes are passive evidence types only. They do not grant access, deny access, expire accounts, evaluate policy, run workflows, enforce outcomes, or own application actions.
 
 ---
 
@@ -138,14 +138,15 @@ See:
 
 ```txt
 examples/subscription-entitlement-decision-audit.json
+examples/evidence-lanes-decision-audit.json
 ```
 
-This example models a subscription entitlement decision workflow:
+These examples model decision evidence snapshots:
 
 ```txt
 User attempts premium API access
 ↓
-Application queries entitlement, denial, and expiry facts
+Application queries plan, denial, and expiry facts
 ↓
 Application computes eligibility
 ↓
@@ -343,25 +344,19 @@ StateMirror preserves evidence.
 
 ---
 
-## Related SimpleStates evidence shapes
+## Native Evidence Lanes
 
 StateMirror Core stays schema-agnostic.
 
-SimpleStates may provide optional canonical evidence shapes for common decision evidence patterns, including:
+StateMirror Core provides optional canonical Evidence Lane types for common decision evidence patterns:
 
-* Plan Evidence
-* Denial Evidence
-* Expiry Evidence
+* PlanEvidence
+* DenialEvidence
+* ExpiryEvidence
 
-These are optional schemas only. Custom evidence schemas remain first-class.
+These shapes are intended for use inside `state_payload.inputs`. They are optional schemas only. Custom evidence schemas remain first-class.
 
-They do not change the StateMirror boundary: the application owns the decision, and StateMirror preserves the evidence.
-
-Website:
-
-```txt
-https://www.simple-states.com
-```
+They do not change the StateMirror boundary: the application owns the decision and action, and StateMirror preserves the evidence.
 
 ---
 

@@ -122,6 +122,20 @@ Typical fields:
 
 StateMirror treats `state_payload` as opaque JSON. Payload meaning remains application-owned.
 
+## Evidence Lanes
+
+StateMirror Core provides native optional canonical Evidence Lane types:
+
+- PlanEvidence
+- DenialEvidence
+- ExpiryEvidence
+
+These shapes are useful inside `state_payload.inputs` when an application wants to preserve plan, denial, or expiry facts consistently.
+
+Evidence Lanes are not required formats. Snapshot creation remains schema-agnostic.
+
+StateMirror stores Evidence Lanes as ordinary payload JSON. It does not decide, enforce, evaluate policy, execute workflows, or own application actions.
+
 ## Integrity model
 
 Each stored snapshot receives:

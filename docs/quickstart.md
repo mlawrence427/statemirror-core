@@ -93,6 +93,8 @@ This example submits a simple subscription entitlement evidence snapshot.
 
 The application is still responsible for the actual decision and outcome. StateMirror only preserves the submitted evidence.
 
+The `plan`, `denial`, and `expiry` objects use optional canonical Evidence Lane shapes inside `state_payload.inputs`. They are not required by StateMirror Core.
+
 Windows CMD:
 
 ```bash
@@ -100,7 +102,7 @@ curl -X POST http://localhost:8080/v1/snapshots ^
   -H "Authorization: Bearer smr_test_write_key_456" ^
   -H "Idempotency-Key: local-demo-001" ^
   -H "Content-Type: application/json" ^
-  -d "{\"evidence_ref\":\"premium-api:user_123:req_001\",\"evidence_type\":\"subscription_entitlement_decision\",\"captured_at\":\"2025-12-01T18:44:22.000Z\",\"state_payload\":{\"subject\":\"user_123\",\"requested_resource\":\"premium_api\",\"inputs\":{\"plan\":{\"status\":\"active\",\"plan\":\"commercial\",\"read_at\":\"2025-12-01T18:44:21.810Z\"},\"denial\":{\"signal\":\"denial_absent\",\"read_at\":\"2025-12-01T18:44:21.842Z\"},\"expiry\":{\"signal\":\"not_expired\",\"expires_at\":\"2026-01-01T00:00:00.000Z\",\"read_at\":\"2025-12-01T18:44:21.879Z\"}},\"computed\":{\"eligible\":true,\"decision\":\"granted\",\"reason\":\"active_plan_no_denial_not_expired\"},\"outcome\":{\"owned_by\":\"application\",\"action\":\"grant_premium_api_access\",\"executed_outside_statemirror\":true}}}"
+  -d "{\"evidence_ref\":\"premium-api:user_123:req_001\",\"evidence_type\":\"subscription_entitlement_decision\",\"captured_at\":\"2025-12-01T18:44:22.000Z\",\"state_payload\":{\"subject\":\"user_123\",\"requested_resource\":\"premium_api\",\"inputs\":{\"plan\":{\"evidence_type\":\"plan_evidence\",\"status\":\"active\",\"plan\":\"commercial\",\"read_at\":\"2025-12-01T18:44:21.810Z\"},\"denial\":{\"evidence_type\":\"denial_evidence\",\"signal\":\"denial_absent\",\"read_at\":\"2025-12-01T18:44:21.842Z\"},\"expiry\":{\"evidence_type\":\"expiry_evidence\",\"signal\":\"not_expired\",\"expires_at\":\"2026-01-01T00:00:00.000Z\",\"read_at\":\"2025-12-01T18:44:21.879Z\"}},\"computed\":{\"eligible\":true,\"decision\":\"granted\",\"reason\":\"active_plan_no_denial_not_expired\"},\"outcome\":{\"owned_by\":\"application\",\"action\":\"grant_premium_api_access\",\"executed_outside_statemirror\":true}}}"
 ```
 
 macOS/Linux:
@@ -119,15 +121,18 @@ curl -X POST http://localhost:8080/v1/snapshots \
       "requested_resource": "premium_api",
       "inputs": {
         "plan": {
+          "evidence_type": "plan_evidence",
           "status": "active",
           "plan": "commercial",
           "read_at": "2025-12-01T18:44:21.810Z"
         },
         "denial": {
+          "evidence_type": "denial_evidence",
           "signal": "denial_absent",
           "read_at": "2025-12-01T18:44:21.842Z"
         },
         "expiry": {
+          "evidence_type": "expiry_evidence",
           "signal": "not_expired",
           "expires_at": "2026-01-01T00:00:00.000Z",
           "read_at": "2025-12-01T18:44:21.879Z"
@@ -246,7 +251,13 @@ A good evidence snapshot usually includes:
 * outcome owned by the application
 * correlation ID or request ID
 
-Canonical evidence shapes may be added for common patterns, but custom evidence schemas remain first-class.
+Native Evidence Lanes are optional canonical shapes for common input facts:
+
+* PlanEvidence
+* DenialEvidence
+* ExpiryEvidence
+
+They are useful inside `state_payload.inputs`, but they are not required formats. StateMirror stores them as ordinary payload JSON and does not decide, enforce, evaluate policy, execute workflows, or own application actions.
 
 ## Troubleshooting
 
