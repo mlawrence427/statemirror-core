@@ -1,3 +1,42 @@
+// Optional canonical evidence lane shapes. StateMirror stores these as ordinary
+// state_payload JSON and does not require, validate, interpret, or enforce them.
+export interface PlanEvidence {
+  evidence_type: 'plan_evidence';
+  plan?: string;
+  status?: string;
+  entitlements?: string[];
+  source?: string;
+  source_version?: string;
+  read_at?: string;
+  source_updated_at?: string;
+  [field: string]: unknown;
+}
+
+export interface DenialEvidence {
+  evidence_type: 'denial_evidence';
+  signal?: 'denial_present' | 'denial_absent' | 'denial_unknown';
+  reason_code?: string;
+  scope?: string;
+  source?: string;
+  source_version?: string;
+  read_at?: string;
+  source_updated_at?: string;
+  [field: string]: unknown;
+}
+
+export interface ExpiryEvidence {
+  evidence_type: 'expiry_evidence';
+  signal?: 'expired' | 'not_expired' | 'expiry_unknown';
+  expires_at?: string;
+  cause_code?: string;
+  renewable?: boolean;
+  source?: string;
+  source_version?: string;
+  read_at?: string;
+  source_updated_at?: string;
+  [field: string]: unknown;
+}
+
 export interface SnapshotInput {
   evidence_ref?: string;
   evidence_type?: string;

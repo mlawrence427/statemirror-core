@@ -1,0 +1,70 @@
+{
+  "evidence_ref": "decision:user_123:premium_api:req_2025_12_01_184422",
+  "evidence_type": "evidence_lanes_decision_audit",
+  "captured_at": "2025-12-01T18:44:22.000Z",
+  "source_system": "application-api",
+  "source_version": "2.0.0",
+  "correlation_id": "req_2025_12_01_184422",
+  "state_payload": {
+    "subject": "user_123",
+    "requested_action": "access_premium_api",
+    "request_context": {
+      "route": "/v1/premium/report",
+      "method": "GET",
+      "environment": "production"
+    },
+    "inputs": {
+      "plan": {
+        "evidence_type": "plan_evidence",
+        "plan": "commercial",
+        "status": "active",
+        "entitlements": [
+          "premium_api",
+          "priority_exports"
+        ],
+        "source": "billing-service",
+        "source_version": "2025-12-01",
+        "read_at": "2025-12-01T18:44:21.810Z",
+        "source_updated_at": "2025-12-01T18:40:00.000Z"
+      },
+      "denial": {
+        "evidence_type": "denial_evidence",
+        "signal": "denial_absent",
+        "scope": "premium_api",
+        "source": "entitlement-service",
+        "source_version": "2025-12-01",
+        "read_at": "2025-12-01T18:44:21.842Z",
+        "source_updated_at": "2025-12-01T18:30:00.000Z"
+      },
+      "expiry": {
+        "evidence_type": "expiry_evidence",
+        "signal": "not_expired",
+        "expires_at": "2026-01-01T00:00:00.000Z",
+        "cause_code": "subscription_period_end",
+        "renewable": true,
+        "source": "subscription-service",
+        "source_version": "2025-12-01",
+        "read_at": "2025-12-01T18:44:21.879Z",
+        "source_updated_at": "2025-12-01T18:35:00.000Z"
+      }
+    },
+    "application_assessment": {
+      "decision": "granted",
+      "reason": "application_observed_active_plan_no_denial_not_expired",
+      "policy_version": "premium-api-access-2025-12-REV-A",
+      "assessed_by": "application-api"
+    },
+    "outcome": {
+      "owned_by": "application",
+      "action": "grant_premium_api_access",
+      "executed_outside_statemirror": true
+    },
+    "statemirror_boundary": {
+      "preserved_evidence_only": true,
+      "state_mirror_made_decision": false,
+      "state_mirror_enforced_outcome": false,
+      "state_mirror_evaluated_policy": false,
+      "state_mirror_executed_workflow": false
+    }
+  }
+}
