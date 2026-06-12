@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.3.0
+
+Developer workflow and verification release.
+
+Highlights:
+
+- Added shared verification logic for preserved payload/hash/chain integrity
+- Added snapshot-by-id verification endpoint
+- Kept existing chain verification endpoint and routed it through shared verification logic
+- Added local `statemirror verify`, `statemirror inspect`, and `statemirror export` CLI commands
+- Added JSON export support for one snapshot or a sequence range, with optional verification metadata
+- Added developer-oriented failure codes for payload hash mismatches, broken chain links, sequence gaps, missing snapshots, malformed records, and invalid ranges
+- Added verification documentation and CLI examples
+- Added focused verification and CLI tests
+
+Verification can detect tampering, broken links, missing records, or corrupted stored evidence. It does not prove the application made the correct decision, prove submitted evidence was globally true, or validate policy correctness.
+
 ## v0.2.0
 
 Native Evidence Lanes release.

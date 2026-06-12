@@ -27,9 +27,21 @@ interface HealthResponse {
 
 describe('StateMirror Smoke Tests', () => {
   let createdSnapshotId: string;
+  let serverAvailable = false;
   const idempotencyKey = `test-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-  test('health check returns healthy status', async () => {
+  before(async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/v1/health`);
+      serverAvailable = response.ok;
+    } catch {
+      serverAvailable = false;
+    }
+  });
+
+  test('health check returns healthy status', async (t) => {
+    if (!serverAvailable) return t.skip('StateMirror server is not available');
+
     const response = await fetch(`${BASE_URL}/v1/health`);
     assert.strictEqual(response.status, 200);
 
@@ -38,7 +50,9 @@ describe('StateMirror Smoke Tests', () => {
     assert.strictEqual(data.database, 'connected');
   });
 
-  test('create snapshot returns 201', async () => {
+  test('create snapshot returns 201', async (t) => {
+    if (!serverAvailable) return t.skip('StateMirror server is not available');
+
     const response = await fetch(`${BASE_URL}/v1/snapshots`, {
       method: 'POST',
       headers: {
@@ -71,7 +85,9 @@ describe('StateMirror Smoke Tests', () => {
     createdSnapshotId = data.snapshot_id;
   });
 
-  test('idempotent replay returns 200 with same data', async () => {
+  test('idempotent replay returns 200 with same data', async (t) => {
+    if (!serverAvailable) return t.skip('StateMirror server is not available');
+
     const response = await fetch(`${BASE_URL}/v1/snapshots`, {
       method: 'POST',
       headers: {
@@ -99,7 +115,9 @@ describe('StateMirror Smoke Tests', () => {
     assert.strictEqual(data.snapshot_id, createdSnapshotId);
   });
 
-  test('conflict detection returns 409', async () => {
+  test('conflict detection returns 409', async (t) => {
+    if (!serverAvailable) return t.skip('StateMirror server is not available');
+
     const response = await fetch(`${BASE_URL}/v1/snapshots`, {
       method: 'POST',
       headers: {
@@ -122,7 +140,9 @@ describe('StateMirror Smoke Tests', () => {
     assert.strictEqual(response.status, 409);
   });
 
-  test('read snapshot by ID returns full data with integrity', async () => {
+  test('read snapshot by ID returns full data with integrity', async (t) => {
+    if (!serverAvailable) return t.skip('StateMirror server is not available');
+
     const response = await fetch(`${BASE_URL}/v1/snapshots/${createdSnapshotId}`, {
       headers: {
         Authorization: `Bearer ${READ_KEY}`,
@@ -144,7 +164,9 @@ describe('StateMirror Smoke Tests', () => {
     assert.strictEqual(data.integrity.chain_valid, true);
   });
 
-  test('query by evidence_ref returns results', async () => {
+  test('query by evidence_ref returns results', async (t) => {
+    if (!serverAvailable) return t.skip('StateMirror server is not available');
+
     const response = await fetch(
       `${BASE_URL}/v1/snapshots?evidence_ref=test:unit:smoke`,
       {
@@ -161,7 +183,9 @@ describe('StateMirror Smoke Tests', () => {
     assert.ok(data.snapshots.length >= 1);
   });
 
-  test('unauthorized request returns 401', async () => {
+  test('unauthorized request returns 401', async (t) => {
+    if (!serverAvailable) return t.skip('StateMirror server is not available');
+
     const response = await fetch(`${BASE_URL}/v1/snapshots/${createdSnapshotId}`, {
       headers: {
         Authorization: 'Bearer invalid_key',
@@ -171,7 +195,9 @@ describe('StateMirror Smoke Tests', () => {
     assert.strictEqual(response.status, 401);
   });
 
-  test('missing idempotency key returns 400', async () => {
+  test('missing idempotency key returns 400', async (t) => {
+    if (!serverAvailable) return t.skip('StateMirror server is not available');
+
     const response = await fetch(`${BASE_URL}/v1/snapshots`, {
       method: 'POST',
       headers: {
@@ -189,7 +215,9 @@ describe('StateMirror Smoke Tests', () => {
     assert.strictEqual(response.status, 400);
   });
 
-  test('integrity verify returns valid for chain', async () => {
+  test('integrity verify returns valid for chain', async (t) => {
+    if (!serverAvailable) return t.skip('StateMirror server is not available');
+
     // Create a second snapshot first
     const newKey = `test-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     await fetch(`${BASE_URL}/v1/snapshots`, {

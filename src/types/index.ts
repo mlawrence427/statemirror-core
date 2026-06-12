@@ -114,9 +114,32 @@ export interface IntegrityVerifyResponse {
   first_sequence: number;
   last_sequence: number;
   elapsed_ms: number;
+  failure_code?: string;
+  message?: string;
   break_at_sequence?: number;
+  expected?: string;
+  actual?: string;
   expected_prev_hash?: string;
   actual_prev_hash?: string;
+}
+
+export interface SnapshotVerifyResponse {
+  component: 'StateMirror';
+  version: string;
+  snapshot_id: string;
+  sequence_num: number;
+  valid: boolean;
+  failure_code?: string;
+  message: string;
+  expected?: string;
+  actual?: string;
+  break_at_sequence?: number;
+  adjacent_chain?: {
+    previous_sequence: number | null;
+    next_sequence: number | null;
+    previous_chain_hash: string | null;
+    next_prev_chain_hash: string | null;
+  };
 }
 
 export interface HealthResponse {

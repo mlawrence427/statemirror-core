@@ -11,11 +11,13 @@ import {
   buffersEqual,
 } from '../lib/hash.js';
 import { canonicalize } from '../lib/canonicalize.js';
+import { verifySnapshot } from '../lib/verification.js';
 import type {
   SnapshotInput,
   SnapshotRecord,
   SnapshotResponse,
   SnapshotFullResponse,
+  SnapshotVerifyResponse,
 } from '../types/index.js';
 
 export async function snapshotRoutes(fastify: FastifyInstance, config: Config) {
@@ -329,6 +331,96 @@ export async function snapshotRoutes(fastify: FastifyInstance, config: Config) {
         integrity: {
           payload_valid: payloadValid,
           chain_valid: chainValid,
+        },
+      });
+    }
+  );
+
+  // GET /v1/snapshots/:snapshot_id/verify - Verify one snapshot by ID
+  fastify.get<{
+    Params: { snapshot_id: string };
+    Reply: SnapshotVerifyResponse | { error: string; message: string; failure_code?: string };
+  }>(
+    '/v1/snapshots/:snapshot_id/verify',
+    {
+      preHandler: readAuth,
+    },
+    async (request, reply) => {
+      const { snapshot_id } = request.params;
+
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(snapshot_id)) {
+        return reply.status(400).send({
+          error: 'Bad Request',
+          message: 'Invalid snapshot_id format',
+        });
+      }
+
+      const pool = getPool();
+      const result = await pool.query(
+        `SELECT snapshot_id, sequence_num, state_payload, payload_hash, prev_chain_hash, chain_hash
+         FROM snapshots WHERE snapshot_id = $1`,
+        [snapshot_id]
+      );
+
+      if (result.rows.length === 0) {
+        return reply.status(404).send({
+          error: 'Not Found',
+          message: 'Snapshot not found',
+          failure_code: 'SNAPSHOT_NOT_FOUND',
+        });
+      }
+
+      const row = result.rows[0] as SnapshotRecord;
+      const sequenceNum = parseInt(row.sequence_num, 10);
+
+      let previousChainHash: Buffer | null | undefined = null;
+      let previousSequence: number | null = null;
+      if (sequenceNum > 1) {
+        const previous = await pool.query(
+          `SELECT sequence_num, chain_hash FROM snapshots WHERE sequence_num = $1`,
+          [sequenceNum - 1]
+        );
+        if (previous.rows.length > 0) {
+          previousSequence = parseInt(previous.rows[0].sequence_num, 10);
+          previousChainHash = previous.rows[0].chain_hash;
+        } else {
+          previousChainHash = undefined;
+        }
+      }
+
+      const next = await pool.query(
+        `SELECT sequence_num, prev_chain_hash FROM snapshots WHERE sequence_num = $1`,
+        [sequenceNum + 1]
+      );
+      const nextSequence =
+        next.rows.length > 0 ? parseInt(next.rows[0].sequence_num, 10) : null;
+      const nextPrevChainHash =
+        next.rows.length > 0 && next.rows[0].prev_chain_hash
+          ? toBase64(next.rows[0].prev_chain_hash)
+          : null;
+
+      const verification = verifySnapshot(row, {
+        expectedPrevChainHash: previousChainHash,
+        requirePreviousLink: true,
+      });
+
+      return reply.send({
+        component: config.component,
+        version: config.version,
+        snapshot_id: row.snapshot_id,
+        sequence_num: sequenceNum,
+        valid: verification.valid,
+        failure_code: verification.failure_code,
+        message: verification.message,
+        expected: verification.expected,
+        actual: verification.actual,
+        break_at_sequence: verification.break_at_sequence,
+        adjacent_chain: {
+          previous_sequence: previousSequence,
+          next_sequence: nextSequence,
+          previous_chain_hash: previousChainHash ? toBase64(previousChainHash) : null,
+          next_prev_chain_hash: nextPrevChainHash,
         },
       });
     }

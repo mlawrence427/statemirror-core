@@ -139,6 +139,7 @@ See:
 ```txt
 examples/subscription-entitlement-decision-audit.json
 examples/evidence-lanes-decision-audit.json
+examples/verification-cli-commands.md
 ```
 
 These examples model decision evidence snapshots:
@@ -225,6 +226,17 @@ Authorization: Bearer <read_key>
 
 ---
 
+### Verify snapshot
+
+```bash
+GET /v1/snapshots/{snapshot_id}/verify
+Authorization: Bearer <read_key>
+```
+
+Verifies the preserved snapshot payload hash and recomputed chain hash. When adjacent chain context is available, it also checks the previous chain link.
+
+---
+
 ### Query by evidence reference
 
 ```bash
@@ -250,6 +262,44 @@ Example body:
   "to_sequence": 100
 }
 ```
+
+---
+
+## Verification
+
+Verification proves that preserved snapshot payloads and chain links match their stored hashes.
+
+Verification can detect tampering, broken links, missing records, or corrupted stored evidence.
+
+Verification does not prove the application made the correct decision.
+
+Verification does not prove submitted evidence was globally true across all upstream systems.
+
+Verification does not validate policy correctness.
+
+Verification does not make StateMirror an enforcement layer, workflow engine, policy engine, decision engine, or observability replacement.
+
+See:
+
+```txt
+docs/verification.md
+```
+
+---
+
+## CLI
+
+After build or package installation, the local CLI exposes:
+
+```bash
+statemirror verify --snapshot-id <snapshot_id>
+statemirror verify --from-sequence 1 --to-sequence 100 --json
+statemirror inspect --snapshot-id <snapshot_id> --pretty
+statemirror export --snapshot-id <snapshot_id> --include-verification --pretty
+statemirror export --from-sequence 1 --to-sequence 100 --output evidence-export.json
+```
+
+The CLI uses local StateMirror database configuration. It verifies, inspects, and exports preserved evidence only. It does not validate policy, make decisions, enforce outcomes, or execute workflows.
 
 ---
 
