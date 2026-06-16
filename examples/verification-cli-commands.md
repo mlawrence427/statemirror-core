@@ -4,6 +4,13 @@ These examples inspect preserved decision evidence locally.
 
 They do not validate policy correctness, decide outcomes, enforce access, execute workflows, or prove submitted evidence was globally true.
 
+Common questions:
+
+* Why was this customer charged?
+* Why was this account denied access?
+* Why did this subscription expire?
+* What did the application know when it acted?
+
 ## Verify One Snapshot
 
 ```bash

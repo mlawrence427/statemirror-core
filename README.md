@@ -2,7 +2,9 @@
 
 Immutable evidence snapshots for application decision systems.
 
-StateMirror Core is a self-hosted runtime for capturing the exact JSON evidence your application computed at a decision moment. It stores that evidence immutably, assigns it a reference, and provides hash-chain verification for later review.
+When a customer is charged, denied, downgraded, expired, or restricted, teams should not have to reconstruct what the application knew from logs, telemetry, Stripe state, scattered database rows, and old business rules.
+
+StateMirror Core preserves structured decision evidence at the moment an application acts. It stores the exact JSON evidence your application submitted, assigns it a reference, and provides local tools to verify, inspect, and export the preserved record later.
 
 StateMirror does not decide outcomes. It preserves what your system submitted.
 
@@ -23,11 +25,45 @@ StateMirror Core does not:
 * operate a hosted control plane
 * provide dashboards or analytics
 * evaluate business rules
+* replace observability
 * replace your application logic
 
 Applications compute facts. Applications decide. Applications execute outcomes.
 
 StateMirror preserves submitted evidence.
+
+---
+
+## Why this exists
+
+Production systems often need to answer a hard question later:
+
+> What did the application know when it acted?
+
+This comes up in practical moments:
+
+* Why was this customer charged?
+* Why was this account denied access?
+* Why did this subscription expire?
+* Why was this account downgraded or restricted?
+
+Logs are noisy. Telemetry is fragmented. Current database state has already changed. Upstream systems may no longer show what the application saw at decision time.
+
+StateMirror captures a decision-time evidence snapshot so support, operations, review, or dispute workflows can retrieve the exact payload later.
+
+StateMirror is for preserving the evidence behind a decision, not for making the decision.
+
+---
+
+## Common use cases
+
+* Billing and subscription disputes
+* Entitlement and access denials
+* Plan downgrades or restrictions
+* Expiry and renewal investigations
+* Customer-support escalations where teams need to explain what the application knew when it acted
+
+These are examples, not required domains. StateMirror Core remains schema-agnostic.
 
 ---
 
@@ -45,31 +81,15 @@ Evidence Lanes are passive evidence types only. They do not grant access, deny a
 
 ---
 
-## Why this exists
-
-Production systems often need to answer a hard question later:
-
-> What did the application believe was true when it made this decision?
-
-Logs are noisy.
-Events are fragmented.
-Current database state has already changed.
-
-StateMirror captures a decision-time evidence snapshot so support, operations, compliance, or dispute workflows can retrieve the exact payload later.
-
-StateMirror is for preserving the evidence behind a decision, not for making the decision.
-
----
-
 ## Repository contents
 
 ```txt
 migrations/       PostgreSQL schema and indexes
 src/              StateMirror Core runtime
-tests/            Smoke tests
+tests/            Smoke and unit tests
 scripts/          Local smoke-test script
-docs/             Architecture, quickstart, boundary, and DX notes
-examples/         Canonical example payloads
+docs/             Architecture, quickstart, verification, boundary, and roadmap notes
+examples/         Canonical example payloads and CLI examples
 
 docker-compose.yml
 Dockerfile
@@ -90,13 +110,9 @@ Core boundary:
 
 ```txt
 Application computes facts
-↓
 Application submits evidence payload
-↓
 StateMirror preserves immutable snapshot
-↓
 Application executes outcome
-↓
 Support later retrieves exact evidence
 ```
 
@@ -132,7 +148,7 @@ http://localhost:8080
 
 ---
 
-## Canonical examples
+## Examples
 
 See:
 
@@ -142,28 +158,14 @@ examples/evidence-lanes-decision-audit.json
 examples/verification-cli-commands.md
 ```
 
-These examples model decision evidence snapshots:
+These examples model decision evidence snapshots and local developer workflows.
 
-```txt
-User attempts premium API access
-↓
-Application queries plan, denial, and expiry facts
-↓
-Application computes eligibility
-↓
-Application snapshots evidence in StateMirror
-↓
-Application executes outcome
-↓
-Support later retrieves exact decision snapshot
-```
+Example questions they help answer:
 
-Additional examples may model other decision-evidence patterns, such as:
-
-* subscription downgrade
-* entitlement denial
-* expiry state
-* workflow approval
+* What did the application know when it acted?
+* Why was access granted or denied?
+* Which plan, denial, or expiry facts were submitted?
+* Can the preserved payload and chain links still be verified?
 
 These examples are not required schemas. They are reference patterns for evidence discipline.
 
@@ -211,8 +213,8 @@ Example payload:
 Idempotency behavior:
 
 ```txt
-same key + same payload      → original snapshot response
-same key + different payload → conflict
+same key + same payload      -> original snapshot response
+same key + different payload -> conflict
 ```
 
 ---
@@ -350,14 +352,14 @@ StateMirror does not replace OPA or policy engines. Policy engines can help appl
 
 ## Configuration
 
-| Variable           | Description                         |
-| ------------------ | ----------------------------------- |
-| DATABASE_URL       | PostgreSQL connection string        |
-| PORT               | Server port                         |
-| MAX_PAYLOAD_BYTES  | Maximum accepted payload size       |
-| READ_API_KEYS      | Comma-separated read keys           |
-| WRITE_API_KEYS     | Comma-separated write keys          |
-| LOG_LEVEL          | Runtime log level                   |
+| Variable | Description |
+| --- | --- |
+| DATABASE_URL | PostgreSQL connection string |
+| PORT | Server port |
+| MAX_PAYLOAD_BYTES | Maximum accepted payload size |
+| READ_API_KEYS | Comma-separated read keys |
+| WRITE_API_KEYS | Comma-separated write keys |
+| LOG_LEVEL | Runtime log level |
 | CLEANUP_ON_STARTUP | Cleanup expired idempotency records |
 
 ---
@@ -407,6 +409,16 @@ StateMirror Core provides optional canonical Evidence Lane types for common deci
 These shapes are intended for use inside `state_payload.inputs`. They are optional schemas only. Custom evidence schemas remain first-class.
 
 They do not change the StateMirror boundary: the application owns the decision and action, and StateMirror preserves the evidence.
+
+---
+
+## Roadmap
+
+The v1.0.0 roadmap is a stability checklist, not a feature roadmap:
+
+```txt
+docs/roadmap/v1.0.0.md
+```
 
 ---
 

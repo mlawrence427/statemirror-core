@@ -4,6 +4,8 @@ StateMirror Core is a self-hosted evidence snapshot runtime.
 
 It records submitted JSON evidence at decision time and later retrieves that evidence by reference. It is intentionally not an enforcement engine.
 
+It is useful when teams need to explain billing, access, denial, downgrade, expiry, or restriction decisions without reconstructing what the application knew from logs, telemetry, upstream state, scattered database rows, and old business rules.
+
 ## Boundary model
 
 ```txt

@@ -270,7 +270,16 @@ StateMirror is for teams that need to answer:
 
 > What did the application know when it made this decision?
 
-It is especially relevant when decisions involve changing upstream state, business rules, entitlements, approvals, expirations, denials, disputes, support reviews, or operational investigations.
+It is especially relevant when teams need to explain billing, access, denial, downgrade, expiry, or restriction decisions after the fact.
+
+Example questions:
+
+* Why was this customer charged?
+* Why was this account denied access?
+* Why did this subscription expire?
+* What did the application know when it acted?
+
+StateMirror preserves submitted decision evidence. It does not become billing software, entitlement management, compliance software, a support desk, or a policy engine.
 
 ---
 
