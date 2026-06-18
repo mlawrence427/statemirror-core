@@ -6,6 +6,14 @@ It records submitted JSON evidence at decision time and later retrieves that evi
 
 It is useful when teams need to explain billing, access, denial, downgrade, expiry, or restriction decisions without reconstructing what the application knew from logs, telemetry, upstream state, scattered database rows, and old business rules.
 
+Canonical model:
+
+```txt
+Application -> Decision -> Evidence -> StateMirror -> Verification
+```
+
+Application layer owns decision-making and actions. StateMirror owns evidence preservation. Verification owns structural and cryptographic integrity checks for preserved evidence.
+
 ## Boundary model
 
 ```txt
@@ -25,7 +33,7 @@ Executes action
         ▼
 
 STATEMIRROR CORE
-Evidence Plane
+Evidence Preservation Layer
 ──────────────────────────────────
 
 Stores immutable snapshot
@@ -69,7 +77,7 @@ StateMirror owns:
 - hash-chain continuity
 - idempotent write handling
 - reference-driven retrieval
-- integrity verification
+- structural and cryptographic integrity verification
 
 ## What the application owns
 
@@ -102,6 +110,7 @@ StateMirror does not:
 - provide dashboards
 - search inside arbitrary payload meaning
 - prove the submitted state was correct
+- validate correctness of application behavior
 
 ## Evidence snapshots
 

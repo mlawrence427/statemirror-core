@@ -1,8 +1,8 @@
 # Verification
 
-StateMirror verification checks preserved evidence integrity.
+StateMirror verification checks structural and cryptographic integrity of preserved evidence.
 
-Verification proves that preserved snapshot payloads and chain links match their stored hashes.
+Verification confirms that preserved snapshot payloads and chain links match their stored hashes.
 
 Verification can detect tampering, broken links, missing records, or corrupted stored evidence.
 
@@ -12,7 +12,7 @@ Verification does not prove submitted evidence was globally true across all upst
 
 Verification does not validate policy correctness.
 
-Verification does not make StateMirror an enforcement layer, workflow engine, policy engine, decision engine, or observability replacement.
+Verification does not make StateMirror an enforcement layer, workflow engine, policy engine, decision engine, observability replacement, compliance tool, or audit log replacement.
 
 ---
 
@@ -27,7 +27,7 @@ StateMirror verifies:
 * missing records in a requested range
 * malformed stored records where applicable
 
-Verification is limited to preserved evidence integrity.
+Verification is limited to structural and cryptographic integrity of preserved evidence.
 
 ---
 

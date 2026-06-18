@@ -31,7 +31,9 @@ interface CliOptions {
 const HELP_TEXT = `Usage: statemirror <verify|inspect|export> [flags]
 
 Local tools for preserved evidence integrity only.
-Verification checks payload hashes, chain hashes, chain links, and sequence continuity.
+verify checks structural and cryptographic integrity only.
+inspect retrieves preserved evidence for viewing.
+export extracts preserved evidence as JSON.
 Verification does not prove decision correctness, submitted evidence truth, or policy correctness.
 
 Commands:

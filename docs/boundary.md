@@ -16,6 +16,14 @@ Applications execute outcomes.
 
 StateMirror records what the application submitted at a decision point and makes that evidence retrievable later.
 
+Canonical model:
+
+```txt
+Application -> Decision -> Evidence -> StateMirror -> Verification
+```
+
+StateMirror is not responsible for deciding, enforcing, or validating correctness of application behavior.
+
 ---
 
 # What StateMirror does
@@ -62,6 +70,7 @@ StateMirror does not:
 * replace workflow engines
 * replace policy engines
 * replace application business logic
+* act as a decision engine
 
 Those responsibilities belong to the application or surrounding infrastructure.
 
