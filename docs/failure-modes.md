@@ -548,6 +548,182 @@ StateMirror preserves the evidence the application submitted for a decision.
 
 ---
 
+## 15. Missing snapshot
+
+### Situation
+
+A reviewer requests a snapshot ID that does not exist.
+
+Example:
+
+```bash
+curl http://localhost:8080/v1/snapshots/00000000-0000-0000-0000-000000000000 \
+  -H "Authorization: Bearer smr_test_read_key_123"
+```
+
+### Expected behavior
+
+The API returns `404 Not Found`.
+
+Snapshot verification may include:
+
+```json
+{
+  "error": "Not Found",
+  "message": "Snapshot not found",
+  "failure_code": "SNAPSHOT_NOT_FOUND"
+}
+```
+
+### Boundary
+
+A missing snapshot means StateMirror cannot retrieve or verify that reference.
+
+It does not prove whether the application did or did not make a decision.
+
+---
+
+## 16. Malformed stored snapshot
+
+### Situation
+
+A stored record cannot be verified because required persisted fields are missing or malformed.
+
+### Expected behavior
+
+Verification should fail with `MALFORMED_SNAPSHOT` where applicable.
+
+### Boundary
+
+Malformed snapshot detection is about preservation integrity.
+
+It does not validate application payload meaning or policy correctness.
+
+---
+
+## 17. Invalid verification range
+
+### Situation
+
+A caller requests an invalid sequence range.
+
+Example:
+
+```json
+{
+  "from_sequence": 10,
+  "to_sequence": 5
+}
+```
+
+### Expected behavior
+
+`POST /v1/integrity/verify` returns `400 Bad Request` with `VERIFY_RANGE_INVALID`.
+
+### Boundary
+
+Invalid range errors are request-shape errors.
+
+They do not indicate that preserved evidence was tampered with.
+
+---
+
+## 18. Invalid query window
+
+### Situation
+
+A caller queries by `evidence_type` without a valid bounded capture window.
+
+Examples:
+
+```txt
+missing captured_after
+missing captured_before
+window longer than 24 hours
+captured_after later than captured_before
+invalid timestamp
+```
+
+### Expected behavior
+
+`GET /v1/snapshots` returns `400 Bad Request`.
+
+### Boundary
+
+The query endpoint is retrieval-oriented.
+
+It is not an analytics interface over arbitrary payload meaning.
+
+---
+
+## 19. Auth failure
+
+### Situation
+
+A request omits a bearer token or uses the wrong key for the endpoint.
+
+Examples:
+
+```txt
+read endpoint called without READ_API_KEYS token
+write endpoint called without WRITE_API_KEYS token
+```
+
+### Expected behavior
+
+The API returns `401 Unauthorized`.
+
+### Boundary
+
+StateMirror API keys protect service endpoints.
+
+They are not end-user authentication, authorization, or policy enforcement.
+
+---
+
+## 20. Idempotency conflict
+
+### Situation
+
+A client reuses an `Idempotency-Key` with a different payload.
+
+Example:
+
+```txt
+same key + payload A
+same key + payload B
+```
+
+### Expected behavior
+
+`POST /v1/snapshots` returns `409 Conflict`.
+
+### Boundary
+
+The conflict protects evidence creation from ambiguous retries.
+
+The application must decide whether the second payload is a new decision, a correction, or a client bug.
+
+---
+
+## 21. Broad evidence_ref query
+
+### Situation
+
+A caller queries an `evidence_ref` that matches too many snapshots.
+
+### Expected behavior
+
+If more than 100 snapshots match, `GET /v1/snapshots?evidence_ref=...` returns `400 Bad Request` asking for a more specific reference.
+
+### Boundary
+
+StateMirror retrieval is reference-driven.
+
+It is not a general-purpose analytics or search system.
+
+---
+
 ## Summary
 
 StateMirror should make failure modes easier to inspect, not disappear.

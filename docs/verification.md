@@ -61,6 +61,8 @@ The snapshot endpoint verifies the stored payload hash and recomputed chain hash
 
 ## CLI
 
+See [CLI Reference](cli.md) for local database assumptions, output behavior, and limitations.
+
 Verify one snapshot:
 
 ```bash

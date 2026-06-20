@@ -1,5 +1,23 @@
 # Changelog
 
+## v1.0.0
+
+Stability release.
+
+Highlights:
+
+- Declared stable evidence preservation semantics for submitted decision evidence
+- Declared stable retrieval semantics for snapshot-by-id and existing query paths
+- Declared stable integrity semantics for structural and cryptographic verification only
+- Reaffirmed stable Evidence Lane posture: optional canonical shapes, not required schemas
+- Reaffirmed stable boundaries: StateMirror preserves evidence; applications decide and execute outcomes
+- Added production guidance for configuration, PostgreSQL, migrations, backups, restores, upgrades, compatibility, and operator responsibilities
+- Added complete documentation for existing API endpoints, constraints, failures, auth, and deprecated compatibility fields
+- Added CLI documentation for local database assumptions, migration requirements, output behavior, examples, and limitations
+- Added release notes and failure-mode examples for v1.0.0 readiness
+
+No feature expansion. No workflow engine. No policy engine. No observability system. No hosted service.
+
 ## v0.3.0
 
 Developer workflow and verification release.

@@ -29,7 +29,7 @@ Use local development keys in `.env`:
 ```txt
 PORT=8080
 READ_API_KEYS=smr_test_read_key_123
-WRITE_API_KEYS=smr_test_write_key_456
+WRITE_API_KEYS=smw_test_write_key_456
 DATABASE_URL=postgres://statemirror:statemirror@localhost:5432/statemirror
 ```
 
@@ -99,7 +99,7 @@ Windows CMD:
 
 ```bash
 curl -X POST http://localhost:8080/v1/snapshots ^
-  -H "Authorization: Bearer smr_test_write_key_456" ^
+  -H "Authorization: Bearer smw_test_write_key_456" ^
   -H "Idempotency-Key: local-demo-001" ^
   -H "Content-Type: application/json" ^
   -d "{\"evidence_ref\":\"premium-api:user_123:req_001\",\"evidence_type\":\"subscription_entitlement_decision\",\"captured_at\":\"2025-12-01T18:44:22.000Z\",\"state_payload\":{\"subject\":\"user_123\",\"requested_resource\":\"premium_api\",\"inputs\":{\"plan\":{\"evidence_type\":\"plan_evidence\",\"status\":\"active\",\"plan\":\"commercial\",\"read_at\":\"2025-12-01T18:44:21.810Z\"},\"denial\":{\"evidence_type\":\"denial_evidence\",\"signal\":\"denial_absent\",\"read_at\":\"2025-12-01T18:44:21.842Z\"},\"expiry\":{\"evidence_type\":\"expiry_evidence\",\"signal\":\"not_expired\",\"expires_at\":\"2026-01-01T00:00:00.000Z\",\"read_at\":\"2025-12-01T18:44:21.879Z\"}},\"computed\":{\"eligible\":true,\"decision\":\"granted\",\"reason\":\"active_plan_no_denial_not_expired\"},\"outcome\":{\"owned_by\":\"application\",\"action\":\"grant_premium_api_access\",\"executed_outside_statemirror\":true}}}"
@@ -109,7 +109,7 @@ macOS/Linux:
 
 ```bash
 curl -X POST http://localhost:8080/v1/snapshots \
-  -H "Authorization: Bearer smr_test_write_key_456" \
+  -H "Authorization: Bearer smw_test_write_key_456" \
   -H "Idempotency-Key: local-demo-001" \
   -H "Content-Type: application/json" \
   -d '{
@@ -188,6 +188,24 @@ curl "http://localhost:8080/v1/snapshots?evidence_ref=premium-api:user_123:req_0
 
 ## 12. Verify integrity
 
+Verify the snapshot by ID:
+
+Windows CMD:
+
+```bash
+curl http://localhost:8080/v1/snapshots/<snapshot_id>/verify ^
+  -H "Authorization: Bearer smr_test_read_key_123"
+```
+
+macOS/Linux:
+
+```bash
+curl http://localhost:8080/v1/snapshots/<snapshot_id>/verify \
+  -H "Authorization: Bearer smr_test_read_key_123"
+```
+
+Verify a sequence range:
+
 Windows CMD:
 
 ```bash
@@ -212,7 +230,31 @@ It can detect tampering with preserved snapshot payloads or ordering.
 
 It does not prove the original application decision was correct.
 
-## 13. Test idempotency
+## 13. Inspect and export with the CLI
+
+The CLI reads the same local database configuration, including `DATABASE_URL`.
+
+Inspect the snapshot:
+
+```bash
+statemirror inspect --snapshot-id <snapshot_id> --pretty
+```
+
+Export the snapshot with verification metadata:
+
+```bash
+statemirror export --snapshot-id <snapshot_id> --include-verification --pretty
+```
+
+Export a sequence range to a file:
+
+```bash
+statemirror export --from-sequence 1 --to-sequence 100 --include-verification --output evidence-export.json
+```
+
+See [docs/cli.md](cli.md) for CLI assumptions and limitations.
+
+## 14. Test idempotency
 
 Send the same request again with the same `Idempotency-Key` and identical payload.
 
@@ -225,7 +267,7 @@ same key + different payload → conflict
 
 This protects clients from accidentally creating duplicate snapshots during retries.
 
-## 14. Run smoke tests
+## 15. Run smoke tests
 
 With the server running:
 

@@ -33,11 +33,15 @@ StateMirror does not determine or validate correctness of decisions. It only pre
 ## Where To Go Next
 
 * Quickstart: [docs/quickstart.md](docs/quickstart.md)
-* API and architecture: [docs/architecture.md](docs/architecture.md)
+* API reference: [docs/api.md](docs/api.md)
+* Architecture: [docs/architecture.md](docs/architecture.md)
+* Production guidance: [docs/production.md](docs/production.md)
 * Boundary: [docs/boundary.md](docs/boundary.md)
 * Verification: [docs/verification.md](docs/verification.md)
+* CLI: [docs/cli.md](docs/cli.md)
 * Failure modes: [docs/failure-modes.md](docs/failure-modes.md)
 * FAQ: [docs/faq.md](docs/faq.md)
+* v1.0.0 release notes: [docs/release-notes/v1.0.0.md](docs/release-notes/v1.0.0.md)
 * v1.0.0 roadmap: [docs/roadmap/v1.0.0.md](docs/roadmap/v1.0.0.md)
 
 ## CLI

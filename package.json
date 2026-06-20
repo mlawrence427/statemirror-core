@@ -1,7 +1,7 @@
 {
   "name": "statemirror",
-  "version": "0.3.0",
-  "description": "A self-hosted, write-once ledger for decision state snapshots",
+  "version": "1.0.0",
+  "description": "A self-hosted decision-time evidence ledger for application systems",
   "main": "dist/index.js",
   "bin": {
     "statemirror": "dist/cli.js"
@@ -23,7 +23,7 @@
     "audit"
   ],
   "author": "",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "dependencies": {
     "@fastify/sensible": "^5.6.0",
     "dotenv": "^17.2.3",
